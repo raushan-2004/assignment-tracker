@@ -1,15 +1,20 @@
 import React, { useState } from 'react';
+// 'import type' is removed, as types don't exist in JS.
 import { Role } from '../types';
 import ConfirmationModal from './ConfirmationModal';
 import ProgressBar from './ProgressBar';
 import { DriveIcon } from './icons/DriveIcon';
 import { CheckCircleIcon } from './icons/CheckCircleIcon';
 import { XCircleIcon } from './icons/XCircleIcon';
+import { LinkIcon } from './icons/LinkIcon';
 
+// The 'interface AssignmentItemProps' is removed.
+// We destructure props directly in the component definition.
 const AssignmentItem = ({ assignment, user, submissions, allStudents = [], onSubmission }) => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showFinalConfirmModal, setShowFinalConfirmModal] = useState(false);
   const [isDetailsExpanded, setIsDetailsExpanded] = useState(false);
+  const [submissionLink, setSubmissionLink] = useState('');
 
   const dueDate = new Date(assignment.dueDate);
   const isPastDue = dueDate < new Date();
@@ -18,8 +23,21 @@ const AssignmentItem = ({ assignment, user, submissions, allStudents = [], onSub
   const studentSubmission = submissions.find(s => s.studentId === user.id && s.assignmentId === assignment.id);
   const isSubmitted = !!studentSubmission;
 
+  // Type annotations ': string' and ': boolean' are removed.
+  const isValidUrl = (url) => {
+    if (!url.trim()) return false;
+    try {
+      const parsedUrl = new URL(url);
+      return ['http:', 'https:'].includes(parsedUrl.protocol);
+    } catch {
+      return false;
+    }
+  };
+
   const handleInitialSubmit = () => {
-    setShowConfirmModal(true);
+    if(isValidUrl(submissionLink)) {
+      setShowConfirmModal(true);
+    }
   };
   
   const handleFirstConfirm = () => {
@@ -28,8 +46,8 @@ const AssignmentItem = ({ assignment, user, submissions, allStudents = [], onSub
   };
   
   const handleFinalConfirm = () => {
-    if (onSubmission) {
-      onSubmission(assignment.id);
+    if (onSubmission && isValidUrl(submissionLink)) {
+      onSubmission(assignment.id, submissionLink);
     }
     setShowFinalConfirmModal(false);
   };
@@ -42,33 +60,58 @@ const AssignmentItem = ({ assignment, user, submissions, allStudents = [], onSub
     <>
       <div className="mt-4 pt-4 border-t border-slate-200">
         {isSubmitted ? (
-          <div className="flex items-center space-x-2 text-green-600 font-semibold p-2 bg-green-50 rounded-lg">
-            <CheckCircleIcon />
-            <span>Submitted on {new Date(studentSubmission.submittedAt).toLocaleDateString()}</span>
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2 text-green-600 font-semibold p-2 bg-green-50 rounded-lg text-sm">
+                <CheckCircleIcon />
+                {/* The '!' non-null operator is removed from studentSubmission.submittedAt */}
+                <span>Submitted on {new Date(studentSubmission.submittedAt).toLocaleDateString()}</span>
+              </div>
+              {studentSubmission.driveLink && (
+                <div className="text-sm pl-1">
+                  <p className="font-semibold text-slate-600">Your Submission:</p>
+                  <a href={studentSubmission.driveLink} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline break-all text-xs flex items-center gap-1.5" title={studentSubmission.driveLink}>
+                    <LinkIcon className="w-3.5 h-3.5 flex-shrink-0" />
+                    <span className="truncate">{studentSubmission.driveLink}</span>
+                  </a>
+                </div>
+              )}
           </div>
         ) : (
-          <button
-            onClick={handleInitialSubmit}
-            disabled={isSubmitted}
-            className="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300 disabled:bg-slate-400 disabled:cursor-not-allowed"
-          >
-            Submit Assignment
-          </button>
+          <div className="space-y-2">
+            <div>
+              <label htmlFor={`submission-link-${assignment.id}`} className="block text-sm font-medium text-slate-700 sr-only">Submission Link</label>
+              <input
+                type="url"
+                id={`submission-link-${assignment.id}`}
+                value={submissionLink}
+                onChange={e => setSubmissionLink(e.target.value)}
+                placeholder="Paste your submission link here"
+                className="block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+              />
+            </div>
+            <button
+              onClick={handleInitialSubmit}
+              disabled={!isValidUrl(submissionLink)}
+              className="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300 disabled:bg-slate-400 disabled:cursor-not-allowed"
+            >
+              Submit Assignment
+            </button>
+          </div>
         )}
       </div>
       {showConfirmModal && (
         <ConfirmationModal
           title="Confirm Submission"
-          message="Are you sure you have submitted this assignment via the provided link? This action will mark it as complete."
+          message="Are you sure you want to submit this link? This action will mark the assignment as complete."
           onConfirm={handleFirstConfirm}
           onCancel={() => setShowConfirmModal(false)}
-          confirmText="Yes, I Have Submitted"
+          confirmText="Yes, Submit Link"
         />
       )}
       {showFinalConfirmModal && (
         <ConfirmationModal
           title="Final Confirmation"
-          message="This action is final and cannot be undone. Please confirm your submission."
+          message="This action is final. Please confirm your submission."
           onConfirm={handleFinalConfirm}
           onCancel={() => setShowFinalConfirmModal(false)}
           confirmText="Confirm Final Submission"
@@ -87,16 +130,27 @@ const AssignmentItem = ({ assignment, user, submissions, allStudents = [], onSub
         {isDetailsExpanded ? 'Hide Details' : 'Show Details'}
       </button>
       {isDetailsExpanded && (
-        <ul className="mt-3 space-y-2 max-h-40 overflow-y-auto pr-2">
+        <ul className="mt-3 space-y-3 max-h-48 overflow-y-auto pr-2">
           {allStudents.map(student => {
-            const hasSubmitted = submissions.some(s => s.studentId === student.id && s.assignmentId === assignment.id);
+              const submission = submissions.find(s => s.studentId === student.id && s.assignmentId === assignment.id);
+              const hasSubmitted = !!submission;
             return (
-              <li key={student.id} className="flex items-center justify-between text-sm">
-                <span className="text-slate-700">{student.name}</span>
-                {hasSubmitted ? 
-                  <span className="flex items-center text-green-600"><CheckCircleIcon className="mr-1" /> Submitted</span> :
-                  <span className="flex items-center text-red-500"><XCircleIcon className="mr-1" /> Not Submitted</span>
-                }
+              <li key={student.id} className="text-sm">
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-700">{student.name}</span>
+                  {hasSubmitted ? 
+                    <span className="flex items-center text-green-600"><CheckCircleIcon className="mr-1" /> Submitted</span> :
+                    <span className="flex items-center text-red-500"><XCircleIcon className="mr-1" /> Not Submitted</span>
+                  }
+                </div>
+                {hasSubmitted && submission.driveLink && (
+                  <div className="mt-1 pl-1">
+                    <a href={submission.driveLink} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline break-all text-xs flex items-center gap-1.5" title={submission.driveLink}>
+                      <LinkIcon className="w-3.5 h-3.5 flex-shrink-0" />
+                      <span className="truncate">{submission.driveLink}</span>
+                    </a>
+                  </div>
+                )}
               </li>
             )
           })}
@@ -111,7 +165,7 @@ const AssignmentItem = ({ assignment, user, submissions, allStudents = [], onSub
         <div className="flex justify-between items-start">
             <h3 className="text-xl font-bold text-slate-800 pr-2">{assignment.title}</h3>
             {assignment.driveLink && (
-              <a href={assignment.driveLink} target="_blank" rel="noopener noreferrer" className="flex-shrink-0 text-slate-500 hover:text-blue-600 transition-colors" title="Open submission link">
+              <a href={assignment.driveLink} target="_blank" rel="noopener noreferrer" className="flex-shrink-0 text-slate-500 hover:text-blue-600 transition-colors" title="Open assignment link">
                 <DriveIcon />
               </a>
             )}
