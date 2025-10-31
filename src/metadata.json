@@ -1,0 +1,5 @@
+{
+  "name": "Assignment Tracker Dashboard",
+  "description": "A clean, responsive dashboard for a student-assignment management system. Students can view and submit assignments, while Admins can create and track submission progress for all students.",
+  "requestFramePermissions": []
+}
