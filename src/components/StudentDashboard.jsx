@@ -1,17 +1,17 @@
 import React from 'react';
-// 'import type' is removed, as types don't exist in JS
+// 'import type' is removed as types do not exist in JS
 import { INITIAL_ASSIGNMENTS } from '../constants';
 import useLocalStorage from '../hooks/useLocalStorage';
 import AssignmentItem from './AssignmentItem';
 
 // The 'interface StudentDashboardProps' is removed.
-// We destructure 'student' directly from props.
+// We destructure 'student' directly from the props.
 const StudentDashboard = ({ student }) => {
   // Generic types <Assignment[]> and <Submission[]> are removed
   const [assignments] = useLocalStorage('assignments', INITIAL_ASSIGNMENTS);
   const [submissions, setSubmissions] = useLocalStorage('submissions', []);
 
-  // Type annotations ': string' are removed from parameters
+  // Type annotations ': string' and '?: string' are removed
   const handleSubmission = (assignmentId, driveLink) => {
     const existingSubmission = submissions.find(s => s.assignmentId === assignmentId && s.studentId === student.id);
     if (!existingSubmission) {
@@ -21,7 +21,7 @@ const StudentDashboard = ({ student }) => {
         studentId: student.id,
         submitted: true,
         submittedAt: new Date().toISOString(),
-        driveLink,
+        ...(driveLink && { driveLink }),
       };
       setSubmissions(prev => [...prev, newSubmission]);
     }

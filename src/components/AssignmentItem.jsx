@@ -1,20 +1,21 @@
 import React, { useState } from 'react';
-// 'import type' is removed, as types don't exist in JS.
+// 'import type' is removed, as types don't exist in JS
 import { Role } from '../types';
 import ConfirmationModal from './ConfirmationModal';
 import ProgressBar from './ProgressBar';
 import { DriveIcon } from './icons/DriveIcon';
 import { CheckCircleIcon } from './icons/CheckCircleIcon';
 import { XCircleIcon } from './icons/XCircleIcon';
-import { LinkIcon } from './icons/LinkIcon';
+import { LinkIcon } from './icons/Linkicon';
 
 // The 'interface AssignmentItemProps' is removed.
-// We destructure props directly in the component definition.
+// Props are destructured directly in the function definition.
 const AssignmentItem = ({ assignment, user, submissions, allStudents = [], onSubmission }) => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showFinalConfirmModal, setShowFinalConfirmModal] = useState(false);
   const [isDetailsExpanded, setIsDetailsExpanded] = useState(false);
   const [submissionLink, setSubmissionLink] = useState('');
+  const [linkError, setLinkError] = useState('');
 
   const dueDate = new Date(assignment.dueDate);
   const isPastDue = dueDate < new Date();
@@ -23,9 +24,8 @@ const AssignmentItem = ({ assignment, user, submissions, allStudents = [], onSub
   const studentSubmission = submissions.find(s => s.studentId === user.id && s.assignmentId === assignment.id);
   const isSubmitted = !!studentSubmission;
 
-  // Type annotations ': string' and ': boolean' are removed.
+  // Type annotations ': string' and ': boolean' are removed
   const isValidUrl = (url) => {
-    if (!url.trim()) return false;
     try {
       const parsedUrl = new URL(url);
       return ['http:', 'https:'].includes(parsedUrl.protocol);
@@ -34,8 +34,19 @@ const AssignmentItem = ({ assignment, user, submissions, allStudents = [], onSub
     }
   };
 
+  // Type annotation ': React.ChangeEvent<HTMLInputElement>' is removed
+  const handleLinkChange = (e) => {
+    const value = e.target.value;
+    setSubmissionLink(value);
+    if (value.trim() !== '' && !isValidUrl(value)) {
+        setLinkError('Please enter a valid URL.');
+    } else {
+        setLinkError('');
+    }
+  };
+
   const handleInitialSubmit = () => {
-    if(isValidUrl(submissionLink)) {
+    if (!linkError) {
       setShowConfirmModal(true);
     }
   };
@@ -46,8 +57,13 @@ const AssignmentItem = ({ assignment, user, submissions, allStudents = [], onSub
   };
   
   const handleFinalConfirm = () => {
-    if (onSubmission && isValidUrl(submissionLink)) {
-      onSubmission(assignment.id, submissionLink);
+    if (onSubmission) {
+      const trimmedLink = submissionLink.trim();
+      if (trimmedLink && isValidUrl(trimmedLink)) {
+        onSubmission(assignment.id, trimmedLink);
+      } else {
+        onSubmission(assignment.id); // Offline submission
+      }
     }
     setShowFinalConfirmModal(false);
   };
@@ -56,70 +72,81 @@ const AssignmentItem = ({ assignment, user, submissions, allStudents = [], onSub
   const submissionsForAssignment = submissions.filter(s => s.assignmentId === assignment.id);
   const progress = allStudents.length > 0 ? (submissionsForAssignment.length / allStudents.length) * 100 : 0;
 
-  const renderStudentView = () => (
-    <>
-      <div className="mt-4 pt-4 border-t border-slate-200">
-        {isSubmitted ? (
-            <div className="space-y-2">
-              <div className="flex items-center space-x-2 text-green-600 font-semibold p-2 bg-green-50 rounded-lg text-sm">
-                <CheckCircleIcon />
-                {/* The '!' non-null operator is removed from studentSubmission.submittedAt */}
-                <span>Submitted on {new Date(studentSubmission.submittedAt).toLocaleDateString()}</span>
-              </div>
-              {studentSubmission.driveLink && (
-                <div className="text-sm pl-1">
-                  <p className="font-semibold text-slate-600">Your Submission:</p>
-                  <a href={studentSubmission.driveLink} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline break-all text-xs flex items-center gap-1.5" title={studentSubmission.driveLink}>
-                    <LinkIcon className="w-3.5 h-3.5 flex-shrink-0" />
-                    <span className="truncate">{studentSubmission.driveLink}</span>
-                  </a>
+  const renderStudentView = () => {
+    const isSubmittingWithLink = submissionLink.trim() !== '' && !linkError;
+
+    return (
+      <>
+        <div className="mt-4 pt-4 border-t border-slate-200">
+          {isSubmitted ? (
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2 text-green-600 font-semibold p-2 bg-green-50 rounded-lg text-sm">
+                    <CheckCircleIcon />
+                    {/* The '!' non-null operator is removed */}
+                    <span>Submitted on {new Date(studentSubmission.submittedAt).toLocaleDateString()}</span>
                 </div>
-              )}
-          </div>
-        ) : (
-          <div className="space-y-2">
-            <div>
-              <label htmlFor={`submission-link-${assignment.id}`} className="block text-sm font-medium text-slate-700 sr-only">Submission Link</label>
-              <input
-                type="url"
-                id={`submission-link-${assignment.id}`}
-                value={submissionLink}
-                onChange={e => setSubmissionLink(e.target.value)}
-                placeholder="Paste your submission link here"
-                className="block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm"
-              />
+                {studentSubmission.driveLink && (
+                    <div className="text-sm pl-1">
+                        <p className="font-semibold text-slate-600">Your Submission:</p>
+                        <a href={studentSubmission.driveLink} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline break-all text-xs flex items-center gap-1.5" title={studentSubmission.driveLink}>
+                            <LinkIcon className="w-3.5 h-3.5 flex-shrink-0" />
+                            <span className="truncate">{studentSubmission.driveLink}</span>
+                        </a>
+                    </div>
+                )}
             </div>
-            <button
-              onClick={handleInitialSubmit}
-              disabled={!isValidUrl(submissionLink)}
-              className="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300 disabled:bg-slate-400 disabled:cursor-not-allowed"
-            >
-              Submit Assignment
-            </button>
-          </div>
+          ) : (
+            <div className="space-y-2">
+              <div>
+                <label htmlFor={`submission-link-${assignment.id}`} className="block text-sm font-medium text-slate-700">Submission Link (Optional)</label>
+                <input
+                  type="url"
+                  id={`submission-link-${assignment.id}`}
+                  value={submissionLink}
+                  onChange={handleLinkChange}
+                  placeholder="Paste link to submit online"
+                  className="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                />
+                {linkError && <p className="text-red-500 text-xs mt-1">{linkError}</p>}
+              </div>
+              <button
+                onClick={handleInitialSubmit}
+                disabled={!!linkError}
+                className="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300 disabled:bg-slate-400 disabled:cursor-not-allowed"
+              >
+                Submit Assignment
+              </button>
+              <p className="text-xs text-slate-500 text-center pt-1">
+                If submitted offline, click on submit assignment.
+              </p>
+            </div>
+          )}
+        </div>
+        {showConfirmModal && (
+          <ConfirmationModal
+            title="Confirm Submission"
+            message={isSubmittingWithLink
+              ? "Are you sure you want to submit this link? This action will mark the assignment as complete."
+              : "Mark this assignment as submitted without a link? This is for work submitted offline."
+            }
+            onConfirm={handleFirstConfirm}
+            onCancel={() => setShowConfirmModal(false)}
+            confirmText={isSubmittingWithLink ? "Yes, Submit Link" : "Yes, Submit Offline"}
+          />
         )}
-      </div>
-      {showConfirmModal && (
-        <ConfirmationModal
-          title="Confirm Submission"
-          message="Are you sure you want to submit this link? This action will mark the assignment as complete."
-          onConfirm={handleFirstConfirm}
-          onCancel={() => setShowConfirmModal(false)}
-          confirmText="Yes, Submit Link"
-        />
-      )}
-      {showFinalConfirmModal && (
-        <ConfirmationModal
-          title="Final Confirmation"
-          message="This action is final. Please confirm your submission."
-          onConfirm={handleFinalConfirm}
-          onCancel={() => setShowFinalConfirmModal(false)}
-          confirmText="Confirm Final Submission"
-          isDestructive={true}
-        />
-      )}
-    </>
-  );
+        {showFinalConfirmModal && (
+          <ConfirmationModal
+            title="Final Confirmation"
+            message="This action is final. Please confirm your submission."
+            onConfirm={handleFinalConfirm}
+            onCancel={() => setShowFinalConfirmModal(false)}
+            confirmText="Confirm Final Submission"
+            isDestructive={true}
+          />
+        )}
+      </>
+    );
+  }
   
   const renderAdminView = () => (
     <div className="mt-4 pt-4 border-t border-slate-200">
