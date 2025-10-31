@@ -1,5 +1,4 @@
 import React from 'react';
-
 const Header = ({ users, currentUser, onUserChange }) => {
   return (
     <header className="bg-white shadow-md">
@@ -8,16 +7,19 @@ const Header = ({ users, currentUser, onUserChange }) => {
           Assignment Tracker
         </h1>
         <div className="flex items-center space-x-4">
-          <div className="text-right hidden sm:block">
-            <p className="font-semibold">{currentUser.name}</p>
-            <p className="text-sm text-slate-500 capitalize">{currentUser.role}</p>
-          </div>
+          {currentUser && (
+            <div className="text-right hidden sm:block">
+              <p className="font-semibold">{currentUser.name}</p>
+              <p className="text-sm text-slate-500 capitalize">{currentUser.role}</p>
+            </div>
+          )}
           <div className="relative">
             <select
-              value={currentUser.id}
+              value={currentUser?.id || ''}
               onChange={(e) => onUserChange(e.target.value)}
               className="appearance-none w-full bg-slate-100 border border-slate-300 text-slate-700 py-2 px-4 pr-8 rounded-lg leading-tight focus:outline-none focus:bg-white focus:border-indigo-500"
             >
+              <option value="" disabled>Select your profile</option>
               {users.map((user) => (
                 <option key={user.id} value={user.id}>
                   {user.name} ({user.role})
