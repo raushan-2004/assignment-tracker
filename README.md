@@ -6,8 +6,22 @@ Assignment Tracker is a small React + Vite application for creating and tracking
 
 - React (JSX)
 - Vite (dev server & build)
-- Tailwind CSS
 - LocalStorage for persistence (custom hook in `src/hooks`)
+
+## Demo users
+
+The project includes a small set of demo users (used as the initial `users` value). Use these credentials to sign in while testing the app.
+
+```
+ID        | Name             | Role    | Password
+----------|------------------|---------|----------
+user-1    | Professor Anya   | admin   | password123
+user-2    | Ben Carter       | student | password123
+user-3    | Chloe Davis      | student | password123
+user-4    | David Evans      | student | password123
+```
+
+These come from `src/constants.js` and are persisted to `localStorage` once the app runs. Creating new users via the UI will append to this list and persist across reloads.
 
 ## Project structure
 
