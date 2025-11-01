@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-// 'import type' is removed, as types don't exist in JS
 import { Role } from '../types';
 import ConfirmationModal from './ConfirmationModal';
 import ProgressBar from './ProgressBar';
@@ -8,8 +7,6 @@ import { CheckCircleIcon } from './icons/CheckCircleIcon';
 import { XCircleIcon } from './icons/XCircleIcon';
 import { LinkIcon } from './icons/Linkicon';
 
-// The 'interface AssignmentItemProps' is removed.
-// Props are destructured directly in the function definition.
 const AssignmentItem = ({ assignment, user, submissions, allStudents = [], onSubmission }) => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showFinalConfirmModal, setShowFinalConfirmModal] = useState(false);
@@ -20,11 +17,9 @@ const AssignmentItem = ({ assignment, user, submissions, allStudents = [], onSub
   const dueDate = new Date(assignment.dueDate);
   const isPastDue = dueDate < new Date();
 
-  // Student View Logic
   const studentSubmission = submissions.find(s => s.studentId === user.id && s.assignmentId === assignment.id);
   const isSubmitted = !!studentSubmission;
 
-  // Type annotations ': string' and ': boolean' are removed
   const isValidUrl = (url) => {
     try {
       const parsedUrl = new URL(url);
@@ -34,7 +29,6 @@ const AssignmentItem = ({ assignment, user, submissions, allStudents = [], onSub
     }
   };
 
-  // Type annotation ': React.ChangeEvent<HTMLInputElement>' is removed
   const handleLinkChange = (e) => {
     const value = e.target.value;
     setSubmissionLink(value);
@@ -62,7 +56,7 @@ const AssignmentItem = ({ assignment, user, submissions, allStudents = [], onSub
       if (trimmedLink && isValidUrl(trimmedLink)) {
         onSubmission(assignment.id, trimmedLink);
       } else {
-        onSubmission(assignment.id); // Offline submission
+        onSubmission(assignment.id); 
       }
     }
     setShowFinalConfirmModal(false);
@@ -82,7 +76,6 @@ const AssignmentItem = ({ assignment, user, submissions, allStudents = [], onSub
               <div className="space-y-2">
                 <div className="flex items-center space-x-2 text-green-600 font-semibold p-2 bg-green-50 rounded-lg text-sm">
                     <CheckCircleIcon />
-                    {/* The '!' non-null operator is removed */}
                     <span>Submitted on {new Date(studentSubmission.submittedAt).toLocaleDateString()}</span>
                 </div>
                 {studentSubmission.driveLink && (

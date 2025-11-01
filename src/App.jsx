@@ -1,10 +1,6 @@
 import React, { useState } from 'react';
-<<<<<<< HEAD
-import { Role } from './types';
-=======
 // 'import type' is removed
 import { Role } from './types'; // Kept, as Role is used as a value
->>>>>>> 9581dd585e5fe72d6f40fe573100be570d8337e6
 import { USERS } from './constants';
 import useLocalStorage from './hooks/useLocalStorage';
 import Header from './components/Header';
