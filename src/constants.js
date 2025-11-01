@@ -1,10 +1,10 @@
 import { Role } from './types';
 
 export const USERS = [
-  { id: 'user-1', name: 'Professor Anya', role: Role.Admin },
-  { id: 'user-2', name: 'Ben Carter', role: Role.Student },
-  { id: 'user-3', name: 'Chloe Davis', role: Role.Student },
-  { id: 'user-4', name: 'David Evans', role: Role.Student },
+  { id: 'user-1', name: 'Professor Anya', role: Role.Admin, password: 'password123' },
+  { id: 'user-2', name: 'Ben Carter', role: Role.Student, password: 'password123' },
+  { id: 'user-3', name: 'Chloe Davis', role: Role.Student, password: 'password123' },
+  { id: 'user-4', name: 'David Evans', role: Role.Student, password: 'password123' },
 ];
 
 export const INITIAL_ASSIGNMENTS = [
