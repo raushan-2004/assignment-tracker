@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 
+// Modal used by admins to create a new assignment. Validates required
+// fields (title, description, due date) before calling onCreate.
 const CreateAssignmentModal = ({ onClose, onCreate }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');

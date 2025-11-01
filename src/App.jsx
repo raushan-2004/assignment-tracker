@@ -7,6 +7,9 @@ import AdminDashboard from './components/AdminDashboard';
 import StudentDashboard from './components/StudentDashboard';
 import Welcome from './components/Welcome';
 
+// App: top-level application. Manages users (persisted to localStorage)
+// and the currently selected user. Passes user lists and handlers down
+// to Header and to the Admin/Student dashboards.
 const App = () => {
   const [users, setUsers] = useLocalStorage('users', USERS);
   const [currentUser, setCurrentUser] = useState(null);
@@ -33,8 +36,9 @@ const App = () => {
       role,
       password,
     };
+    // Persist the new user and set them as the active user immediately
     setUsers(prevUsers => [...prevUsers, newUser]);
-    setCurrentUser(newUser); 
+    setCurrentUser(newUser);
   };
 
   return (

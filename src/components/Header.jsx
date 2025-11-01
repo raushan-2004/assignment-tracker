@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import CreateAccountModal from './CreateAccountModal';
 import LoginModal from './LoginModal';
 
+// Header: top navigation. Shows current user, allows profile selection
+// (which opens the login modal) and exposes create-account modal.
 const Header = ({ users, currentUser, onUserChange, onCreateUser, onLogout }) => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -30,6 +32,7 @@ const Header = ({ users, currentUser, onUserChange, onCreateUser, onLogout }) =>
     const userToLogin = users.find(u => u.id === selectedUserIdForLogin);
 
     if (userToLogin && userToLogin.password === password) {
+      // Successful login: inform App of the active user
       onUserChange(userToLogin.id);
       setIsLoginModalOpen(false);
       setSelectedUserIdForLogin(null);

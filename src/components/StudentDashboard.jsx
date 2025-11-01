@@ -3,6 +3,8 @@ import { INITIAL_ASSIGNMENTS } from '../constants';
 import useLocalStorage from '../hooks/useLocalStorage';
 import AssignmentItem from './AssignmentItem';
 
+// StudentDashboard: lists assignments for the logged-in student and
+// handles creating submissions (persisted to localStorage).
 const StudentDashboard = ({ student }) => {
   const [assignments] = useLocalStorage('assignments', INITIAL_ASSIGNMENTS);
   const [submissions, setSubmissions] = useLocalStorage('submissions', []);
@@ -17,6 +19,7 @@ const StudentDashboard = ({ student }) => {
         submittedAt: new Date().toISOString(),
         ...(driveLink && { driveLink }),
       };
+      // Persist the new submission to localStorage so Admins can see it
       setSubmissions(prev => [...prev, newSubmission]);
     }
   };

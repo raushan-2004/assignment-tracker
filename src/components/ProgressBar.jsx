@@ -1,5 +1,6 @@
 import React from 'react';
 
+// Simple horizontal progress bar. `progress` is expected as a number 0-100.
 const ProgressBar = ({ progress }) => {
   const safeProgress = Math.max(0, Math.min(100, progress));
 

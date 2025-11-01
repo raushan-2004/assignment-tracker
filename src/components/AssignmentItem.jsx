@@ -5,6 +5,9 @@ import ProgressBar from './ProgressBar';
 import { BadgeCheck, BadgeAlert, FileSymlink, Link2 } from 'lucide-react'; 
 
 
+// AssignmentItem renders a single assignment card. It has two modes:
+// - Student view: allows submitting a link or marking as submitted
+// - Admin view: shows progress and a list of which students submitted
 const AssignmentItem = ({ assignment, user, submissions, allStudents = [], onSubmission }) => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showFinalConfirmModal, setShowFinalConfirmModal] = useState(false);
@@ -62,6 +65,7 @@ const AssignmentItem = ({ assignment, user, submissions, allStudents = [], onSub
 
   // Admin View Logic
   const submissionsForAssignment = submissions.filter(s => s.assignmentId === assignment.id);
+  // Progress percentage (0-100) used by ProgressBar
   const progress = allStudents.length > 0 ? (submissionsForAssignment.length / allStudents.length) * 100 : 0;
 
   const renderStudentView = () => {
