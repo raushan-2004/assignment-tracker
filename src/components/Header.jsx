@@ -1,14 +1,49 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import CreateAccountModal from './CreateAccountModal';
+import LoginModal from './LoginModal';
 
-
-const Header = ({ users, currentUser, onUserChange, onCreateUser }) => {
+const Header = ({ users, currentUser, onUserChange, onCreateUser, onLogout }) => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [selectedUserIdForLogin, setSelectedUserIdForLogin] = useState(null);
+  const [selectValue, setSelectValue] = useState(currentUser?.id || '');
+
+  useEffect(() => {
+    setSelectValue(currentUser?.id || '');
+  }, [currentUser]);
 
   const handleCreateAndClose = (name, role, password) => {
     onCreateUser(name, role, password);
     setIsCreateModalOpen(false);
   };
+
+  const handleProfileSelect = (userId) => {
+    if (userId) {
+      setSelectValue(userId);
+      setSelectedUserIdForLogin(userId);
+      setIsLoginModalOpen(true);
+    }
+  };
+
+  const handleLoginAttempt = (password) => {
+    if (!selectedUserIdForLogin) return false;
+    const userToLogin = users.find(u => u.id === selectedUserIdForLogin);
+
+    if (userToLogin && userToLogin.password === password) {
+      onUserChange(userToLogin.id);
+      setIsLoginModalOpen(false);
+      setSelectedUserIdForLogin(null);
+      return true;
+    }
+    return false;
+  };
+
+  const handleLoginModalClose = () => {
+    setIsLoginModalOpen(false);
+    setSelectedUserIdForLogin(null);
+    setSelectValue(currentUser?.id || ''); 
+  };
+
 
   return (
     <>
@@ -26,8 +61,8 @@ const Header = ({ users, currentUser, onUserChange, onCreateUser }) => {
             )}
             <div className="relative">
               <select
-                value={currentUser?.id || ''}
-                onChange={(e) => onUserChange(e.target.value)}
+                value={selectValue}
+                onChange={(e) => handleProfileSelect(e.target.value)}
                 className="appearance-none w-full bg-slate-100 border border-slate-300 text-slate-700 py-2 px-4 pr-8 rounded-lg leading-tight focus:outline-none focus:bg-white focus:border-indigo-500"
               >
                 <option value="" disabled>Select your profile</option>
@@ -41,6 +76,14 @@ const Header = ({ users, currentUser, onUserChange, onCreateUser }) => {
                 <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
               </div>
             </div>
+              {currentUser && (
+                <button
+                onClick={onLogout}
+                className="py-2 px-3 bg-slate-200 text-slate-700 font-semibold rounded-lg hover:bg-slate-300 transition-colors text-sm whitespace-nowrap"
+              >
+                Logout
+              </button>
+            )}
             <button
               onClick={() => setIsCreateModalOpen(true)}
               className="py-2 px-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors text-sm whitespace-nowrap"
@@ -54,6 +97,13 @@ const Header = ({ users, currentUser, onUserChange, onCreateUser }) => {
         <CreateAccountModal
           onClose={() => setIsCreateModalOpen(false)}
           onCreate={handleCreateAndClose}
+        />
+      )}
+        {isLoginModalOpen && selectedUserIdForLogin && (
+        <LoginModal
+          user={users.find(u => u.id === selectedUserIdForLogin)}
+          onClose={handleLoginModalClose}
+          onLogin={handleLoginAttempt}
         />
       )}
     </>

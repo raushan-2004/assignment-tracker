@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
+import { Role } from './types';
 import { USERS } from './constants';
 import useLocalStorage from './hooks/useLocalStorage';
 import Header from './components/Header';
 import AdminDashboard from './components/AdminDashboard';
 import StudentDashboard from './components/StudentDashboard';
 import Welcome from './components/Welcome';
-
 
 const App = () => {
   const [users, setUsers] = useLocalStorage('users', USERS);
@@ -20,6 +20,10 @@ const App = () => {
     if (user) {
       setCurrentUser(user);
     }
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
   };
 
   const handleCreateUser = (name, role, password) => {
@@ -40,6 +44,7 @@ const App = () => {
         currentUser={currentUser}
         onUserChange={handleUserChange}
         onCreateUser={handleCreateUser}
+        onLogout={handleLogout}
       />
       <main className="p-4 md:p-8">
         {currentUser ? (

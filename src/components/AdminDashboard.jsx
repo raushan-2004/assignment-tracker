@@ -1,17 +1,18 @@
 import React, { useState } from 'react';
-import { INITIAL_ASSIGNMENTS, USERS } from '../constants';
+import { INITIAL_ASSIGNMENTS } from '../constants';
 import useLocalStorage from '../hooks/useLocalStorage';
 import AssignmentItem from './AssignmentItem';
 import CreateAssignmentModal from './CreateAssignmentModal';
 import { PlusIcon } from './icons/PlusIcon';
 
-const AdminDashboard = ({ admin }) => {
+const AdminDashboard = ({ admin, users }) => {
   const [assignments, setAssignments] = useLocalStorage('assignments', INITIAL_ASSIGNMENTS);
   const [submissions] = useLocalStorage('submissions', []);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const adminAssignments = assignments.filter(a => a.createdBy === admin.id);
-  const students = USERS.filter(u => u.role === 'student');
+ 
+  const students = (users || []).filter(u => u.role === 'student');
 
   const handleCreateAssignment = (newAssignmentData) => {
     const newAssignment = {
