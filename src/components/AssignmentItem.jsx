@@ -2,10 +2,8 @@ import React, { useState } from 'react';
 import { Role } from '../types';
 import ConfirmationModal from './ConfirmationModal';
 import ProgressBar from './ProgressBar';
-import { DriveIcon } from './icons/DriveIcon';
-import { CheckCircleIcon } from './icons/CheckCircleIcon';
-import { XCircleIcon } from './icons/XCircleIcon';
-import { LinkIcon } from './icons/Linkicon';
+import { BadgeCheck, BadgeAlert, FileSymlink, Link2 } from 'lucide-react'; 
+
 
 const AssignmentItem = ({ assignment, user, submissions, allStudents = [], onSubmission }) => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
@@ -75,14 +73,14 @@ const AssignmentItem = ({ assignment, user, submissions, allStudents = [], onSub
           {isSubmitted ? (
               <div className="space-y-2">
                 <div className="flex items-center space-x-2 text-green-600 font-semibold p-2 bg-green-50 rounded-lg text-sm">
-                    <CheckCircleIcon />
+                    <BadgeCheck />
                     <span>Submitted on {new Date(studentSubmission.submittedAt).toLocaleDateString()}</span>
                 </div>
                 {studentSubmission.driveLink && (
                     <div className="text-sm pl-1">
                         <p className="font-semibold text-slate-600">Your Submission:</p>
                         <a href={studentSubmission.driveLink} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline break-all text-xs flex items-center gap-1.5" title={studentSubmission.driveLink}>
-                            <LinkIcon className="w-3.5 h-3.5 flex-shrink-0" />
+                            <Link2 className="w-3.5 h-3.5 flex-shrink-0" />
                             <span className="truncate">{studentSubmission.driveLink}</span>
                         </a>
                     </div>
@@ -159,14 +157,14 @@ const AssignmentItem = ({ assignment, user, submissions, allStudents = [], onSub
                 <div className="flex items-center justify-between">
                   <span className="text-slate-700">{student.name}</span>
                   {hasSubmitted ? 
-                    <span className="flex items-center text-green-600"><CheckCircleIcon className="mr-1" /> Submitted</span> :
-                    <span className="flex items-center text-red-500"><XCircleIcon className="mr-1" /> Not Submitted</span>
+                    <span className="flex items-center text-green-600"><BadgeCheck className="mr-1" /> Submitted</span> :
+                    <span className="flex items-center text-red-500"><BadgeAlert className="mr-1" /> Not Submitted</span>
                   }
                 </div>
                 {hasSubmitted && submission.driveLink && (
                   <div className="mt-1 pl-1">
                     <a href={submission.driveLink} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline break-all text-xs flex items-center gap-1.5" title={submission.driveLink}>
-                      <LinkIcon className="w-3.5 h-3.5 flex-shrink-0" />
+                      <Link2 className="w-3.5 h-3.5 flex-shrink-0" />
                       <span className="truncate">{submission.driveLink}</span>
                     </a>
                   </div>
@@ -186,7 +184,7 @@ const AssignmentItem = ({ assignment, user, submissions, allStudents = [], onSub
             <h3 className="text-xl font-bold text-slate-800 pr-2">{assignment.title}</h3>
             {assignment.driveLink && (
               <a href={assignment.driveLink} target="_blank" rel="noopener noreferrer" className="flex-shrink-0 text-slate-500 hover:text-blue-600 transition-colors" title="Open assignment link">
-                <DriveIcon />
+                <FileSymlink />
               </a>
             )}
         </div>

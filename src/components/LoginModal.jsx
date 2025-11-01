@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LoginIcon } from './icons/LoginIcon';
+import { LogIn } from 'lucide-react';
 
 const LoginModal = ({ user, onClose, onLogin }) => {
   const [password, setPassword] = useState('');
@@ -19,7 +19,7 @@ const LoginModal = ({ user, onClose, onLogin }) => {
       <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm" onClick={e => e.stopPropagation()}>
         <div className="flex flex-col items-center text-center">
             <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-indigo-100 mb-4">
-                <LoginIcon className="h-6 w-6 text-indigo-600" />
+                <LogIn className="h-6 w-6 text-indigo-600" />
             </div>
             <h3 className="text-xl font-bold text-slate-800">Login required</h3>
             <p className="text-slate-600 mt-2">

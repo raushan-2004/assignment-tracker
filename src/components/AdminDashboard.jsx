@@ -3,7 +3,7 @@ import { INITIAL_ASSIGNMENTS } from '../constants';
 import useLocalStorage from '../hooks/useLocalStorage';
 import AssignmentItem from './AssignmentItem';
 import CreateAssignmentModal from './CreateAssignmentModal';
-import { PlusIcon } from './icons/PlusIcon';
+import { Plus } from 'lucide-react';
 
 const AdminDashboard = ({ admin, users }) => {
   const [assignments, setAssignments] = useLocalStorage('assignments', INITIAL_ASSIGNMENTS);
@@ -32,7 +32,7 @@ const AdminDashboard = ({ admin, users }) => {
           onClick={() => setIsModalOpen(true)}
           className="bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-indigo-700 transition duration-300 flex items-center space-x-2"
         >
-          <PlusIcon />
+          <Plus />
           <span>Create Assignment</span>
         </button>
       </div>
