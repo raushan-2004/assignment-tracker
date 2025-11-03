@@ -143,6 +143,7 @@ const AssignmentItem = ({ assignment, user, submissions, allStudents = [], onSub
     );
   }
   
+  
   const renderAdminView = () => (
     <div className="mt-4 pt-4 border-t border-slate-200">
       <h4 className="font-semibold text-sm text-slate-600 mb-2">Submission Progress</h4>
