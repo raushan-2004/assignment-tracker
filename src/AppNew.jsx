@@ -37,7 +37,7 @@ function AppContent() {
   
   // State management
   const [users, setUsers] = useLocalStorage('users', initializeUsers());
-  const [courses] = useLocalStorage('courses', COURSES);
+  const [courses, setCourses] = useLocalStorage('courses', COURSES);
   const [assignments, setAssignments] = useLocalStorage('assignments', INITIAL_ASSIGNMENTS);
   const [groups, setGroups] = useLocalStorage('groups', INITIAL_GROUPS);
   const [acknowledgments, setAcknowledgments] = useLocalStorage(
@@ -152,6 +152,16 @@ function AppContent() {
     showToast('Assignment deleted', 'success');
   };
 
+  // Course creation handler (Professor)
+  const handleCreateCourse = (courseData) => {
+    const newCourse = {
+      id: `course-${Date.now()}`,
+      ...courseData,
+    };
+    setCourses((prev) => [...prev, newCourse]);
+    showToast('Course created successfully!', 'success');
+  };
+
   // Acknowledgment handler (Student)
   const handleAcknowledge = (assignmentId, studentId, groupId) => {
     const existingAck = acknowledgments.find(
@@ -239,6 +249,7 @@ function AppContent() {
               courses={courses}
               assignments={assignments}
               onCourseClick={handleCourseClick}
+              onCreateCourse={handleCreateCourse}
             />
           ) : (
             <CourseAssignmentsPage
