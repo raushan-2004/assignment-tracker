@@ -162,6 +162,40 @@ function AppContent() {
     showToast('Course created successfully!', 'success');
   };
 
+  // Course enrollment handler (Student)
+  const handleEnrollCourse = (courseId) => {
+    // Update current user's enrolled courses
+    const updatedUser = {
+      ...currentUser,
+      enrolledCourses: [...(currentUser.enrolledCourses || []), courseId],
+    };
+    setCurrentUser(updatedUser);
+
+    // Update users array in localStorage
+    setUsers((prev) =>
+      prev.map((user) =>
+        user.id === currentUser.id
+          ? updatedUser
+          : user
+      )
+    );
+
+    // Update course's enrolled students
+    setCourses((prev) =>
+      prev.map((course) =>
+        course.id === courseId
+          ? {
+              ...course,
+              enrolledStudents: [...course.enrolledStudents, currentUser.id],
+            }
+          : course
+      )
+    );
+
+    const courseName = courses.find((c) => c.id === courseId)?.name;
+    showToast(`Successfully enrolled in ${courseName}!`, 'success');
+  };
+
   // Acknowledgment handler (Student)
   const handleAcknowledge = (assignmentId, studentId, groupId) => {
     const existingAck = acknowledgments.find(
@@ -273,6 +307,7 @@ function AppContent() {
               assignments={assignments}
               acknowledgments={acknowledgments}
               onCourseClick={handleCourseClick}
+              onEnrollCourse={handleEnrollCourse}
             />
           ) : (
             <StudentCourseAssignmentsPage
