@@ -30,6 +30,20 @@ const CourseAssignmentsPage = ({
   const [filterStatus, setFilterStatus] = useState('all'); // all, active, past
   const [filterType, setFilterType] = useState('all'); // all, individual, group
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [expandedAssignments, setExpandedAssignments] = useState(new Set());
+
+  // Toggle expanded state for an assignment
+  const toggleExpanded = (assignmentId) => {
+    setExpandedAssignments((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(assignmentId)) {
+        newSet.delete(assignmentId);
+      } else {
+        newSet.add(assignmentId);
+      }
+      return newSet;
+    });
+  };
 
   // Filter assignments for this course
   const courseAssignments = assignments.filter((a) => a.courseId === course.id);
@@ -256,15 +270,182 @@ const CourseAssignmentsPage = ({
                             : 'students'}
                         </span>
                       </div>
-                      <div className="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
-                        <div
-                          className="bg-gradient-to-r from-green-500 to-emerald-500 h-3 rounded-full transition-all duration-500"
-                          style={{ width: `${progress}%` }}
-                        ></div>
+                      <button
+                        onClick={() => toggleExpanded(assignment.id)}
+                        className="w-full group cursor-pointer"
+                      >
+                        <div className="w-full bg-slate-200 rounded-full h-3 overflow-hidden group-hover:shadow-md transition-shadow">
+                          <div
+                            className="bg-gradient-to-r from-green-500 to-emerald-500 h-3 rounded-full transition-all duration-500 group-hover:from-green-600 group-hover:to-emerald-600"
+                            style={{ width: `${progress}%` }}
+                          ></div>
+                        </div>
+                      </button>
+                      <div className="flex items-center justify-between mt-1">
+                        <p className="text-xs text-slate-500">
+                          {progress.toFixed(0)}% acknowledged
+                        </p>
+                        <button
+                          onClick={() => toggleExpanded(assignment.id)}
+                          className="text-xs text-indigo-600 hover:text-indigo-800 font-medium flex items-center gap-1 transition-colors"
+                        >
+                          {expandedAssignments.has(assignment.id) ? 'Hide' : 'Show'} Details
+                          <svg
+                            className={`w-3 h-3 transition-transform ${
+                              expandedAssignments.has(assignment.id) ? 'rotate-180' : ''
+                            }`}
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </button>
                       </div>
-                      <p className="text-xs text-slate-500 mt-1">
-                        {progress.toFixed(0)}% acknowledged
-                      </p>
+
+                      {/* Expandable Student List */}
+                      {expandedAssignments.has(assignment.id) && (
+                        <div className="mt-4 pt-4 border-t border-slate-200 animate-scale-in">
+                          <h4 className="text-sm font-semibold text-slate-700 mb-3">
+                            {assignment.submissionType === SubmissionType.Group
+                              ? 'Group Submission Status'
+                              : 'Student Submission Status'}
+                          </h4>
+                          <div className="space-y-2 max-h-64 overflow-y-auto">
+                            {assignment.submissionType === SubmissionType.Individual ? (
+                              // Individual assignment - show all students
+                              students.map((student) => {
+                                const hasSubmitted = acknowledgments.some(
+                                  (ack) =>
+                                    ack.assignmentId === assignment.id &&
+                                    ack.studentId === student.id &&
+                                    ack.acknowledged
+                                );
+                                const ack = acknowledgments.find(
+                                  (ack) =>
+                                    ack.assignmentId === assignment.id &&
+                                    ack.studentId === student.id
+                                );
+                                
+                                return (
+                                  <div
+                                    key={student.id}
+                                    className={`flex items-center justify-between p-3 rounded-lg border ${
+                                      hasSubmitted
+                                        ? 'bg-green-50 border-green-200'
+                                        : 'bg-slate-50 border-slate-200'
+                                    }`}
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold ${
+                                        hasSubmitted ? 'bg-green-500 text-white' : 'bg-slate-300 text-slate-600'
+                                      }`}>
+                                        {student.name.charAt(0)}
+                                      </div>
+                                      <div>
+                                        <p className="font-medium text-slate-800">{student.name}</p>
+                                        {hasSubmitted && ack && (
+                                          <p className="text-xs text-slate-500">
+                                            Submitted on {new Date(ack.acknowledgedAt).toLocaleDateString()} at{' '}
+                                            {new Date(ack.acknowledgedAt).toLocaleTimeString([], {
+                                              hour: '2-digit',
+                                              minute: '2-digit',
+                                            })}
+                                          </p>
+                                        )}
+                                      </div>
+                                    </div>
+                                    <div>
+                                      {hasSubmitted ? (
+                                        <span className="flex items-center gap-1 text-green-700 text-sm font-semibold">
+                                          <CheckCircle2 className="w-4 h-4" />
+                                          Submitted
+                                        </span>
+                                      ) : (
+                                        <span className="flex items-center gap-1 text-slate-500 text-sm">
+                                          <Clock className="w-4 h-4" />
+                                          Pending
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                );
+                              })
+                            ) : (
+                              // Group assignment - show groups
+                              groups
+                                .filter((g) => g.assignmentId === assignment.id)
+                                .map((group) => {
+                                  const hasSubmitted = acknowledgments.some(
+                                    (ack) =>
+                                      ack.assignmentId === assignment.id &&
+                                      ack.groupId === group.id &&
+                                      ack.acknowledged
+                                  );
+                                  const ack = acknowledgments.find(
+                                    (ack) =>
+                                      ack.assignmentId === assignment.id &&
+                                      ack.groupId === group.id
+                                  );
+                                  
+                                  return (
+                                    <div
+                                      key={group.id}
+                                      className={`p-3 rounded-lg border ${
+                                        hasSubmitted
+                                          ? 'bg-green-50 border-green-200'
+                                          : 'bg-slate-50 border-slate-200'
+                                      }`}
+                                    >
+                                      <div className="flex items-center justify-between mb-2">
+                                        <div className="flex items-center gap-2">
+                                          <Users className="w-4 h-4 text-purple-600" />
+                                          <h5 className="font-semibold text-slate-800">{group.name}</h5>
+                                        </div>
+                                        {hasSubmitted ? (
+                                          <span className="flex items-center gap-1 text-green-700 text-sm font-semibold">
+                                            <CheckCircle2 className="w-4 h-4" />
+                                            Submitted
+                                          </span>
+                                        ) : (
+                                          <span className="flex items-center gap-1 text-slate-500 text-sm">
+                                            <Clock className="w-4 h-4" />
+                                            Pending
+                                          </span>
+                                        )}
+                                      </div>
+                                      <div className="ml-6 space-y-1">
+                                        {group.members.map((memberId) => {
+                                          const member = students.find((s) => s.id === memberId);
+                                          const isLeader = memberId === group.leaderId;
+                                          return (
+                                            <p key={memberId} className="text-sm text-slate-600">
+                                              • {member?.name || 'Unknown'}
+                                              {isLeader && (
+                                                <span className="ml-2 px-2 py-0.5 bg-purple-100 text-purple-700 text-xs rounded-full">
+                                                  Leader
+                                                </span>
+                                              )}
+                                            </p>
+                                          );
+                                        })}
+                                      </div>
+                                      {hasSubmitted && ack && (
+                                        <p className="text-xs text-slate-500 mt-2 ml-6">
+                                          Submitted on {new Date(ack.acknowledgedAt).toLocaleDateString()} at{' '}
+                                          {new Date(ack.acknowledgedAt).toLocaleTimeString([], {
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                          })}
+                                        </p>
+                                      )}
+                                    </div>
+                                  );
+                                })
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
