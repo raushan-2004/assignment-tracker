@@ -40,6 +40,7 @@ function AppContent() {
   const [courses, setCourses] = useLocalStorage('courses', COURSES);
   const [assignments, setAssignments] = useLocalStorage('assignments', INITIAL_ASSIGNMENTS);
   const [groups, setGroups] = useLocalStorage('groups', INITIAL_GROUPS);
+  const [groupInvitations, setGroupInvitations] = useLocalStorage('groupInvitations', []);
   const [acknowledgments, setAcknowledgments] = useLocalStorage(
     'acknowledgments',
     INITIAL_ACKNOWLEDGMENTS
@@ -216,9 +217,99 @@ function AppContent() {
   };
 
   // Group handlers (Student)
-  const handleCreateGroup = (assignmentId) => {
-    // TODO: Implement group creation modal
-    showToast('Group creation modal coming soon', 'info');
+  const handleCreateGroup = (courseId, groupName, memberIds) => {
+    const newGroup = {
+      id: `group-${Date.now()}`,
+      courseId,
+      name: groupName,
+      leaderId: currentUser.id,
+      members: [currentUser.id], // Start with just the creator
+      createdAt: new Date().toISOString(),
+    };
+    
+    setGroups((prev) => [...prev, newGroup]);
+
+    // Create invitations for selected members
+    const invitations = memberIds.map((memberId) => ({
+      id: `invitation-${Date.now()}-${memberId}`,
+      groupId: newGroup.id,
+      courseId,
+      inviterId: currentUser.id,
+      inviteeId: memberId,
+      status: 'pending',
+      createdAt: new Date().toISOString(),
+    }));
+
+    setGroupInvitations((prev) => [...prev, ...invitations]);
+    showToast(`Group "${groupName}" created! Invitations sent to ${memberIds.length} student${memberIds.length > 1 ? 's' : ''}.`, 'success');
+  };
+
+  const handleAcceptInvitation = (invitationId) => {
+    const invitation = groupInvitations.find((inv) => inv.id === invitationId);
+    if (!invitation) return;
+
+    // Update invitation status
+    setGroupInvitations((prev) =>
+      prev.map((inv) =>
+        inv.id === invitationId ? { ...inv, status: 'accepted' } : inv
+      )
+    );
+
+    // Add user to group
+    setGroups((prev) =>
+      prev.map((group) =>
+        group.id === invitation.groupId
+          ? { ...group, members: [...group.members, currentUser.id] }
+          : group
+      )
+    );
+
+    const group = groups.find((g) => g.id === invitation.groupId);
+    showToast(`You've joined "${group?.name}"!`, 'success');
+  };
+
+  const handleRejectInvitation = (invitationId) => {
+    setGroupInvitations((prev) =>
+      prev.map((inv) =>
+        inv.id === invitationId ? { ...inv, status: 'rejected' } : inv
+      )
+    );
+    showToast('Invitation declined', 'info');
+  };
+
+  const handleLeaveGroup = (groupId) => {
+    const group = groups.find((g) => g.id === groupId);
+    
+    // Remove user from group
+    setGroups((prev) =>
+      prev.map((g) =>
+        g.id === groupId
+          ? { ...g, members: g.members.filter((id) => id !== currentUser.id) }
+          : g
+      )
+    );
+
+    // Delete group if no members left
+    setGroups((prev) => prev.filter((g) => g.id !== groupId || g.members.length > 1));
+
+    showToast(`You've left "${group?.name}"`, 'info');
+  };
+
+  const handleSendInvitation = (groupId, studentId) => {
+    // This function is for future use if we want to add members after group creation
+    const group = groups.find((g) => g.id === groupId);
+    const newInvitation = {
+      id: `invitation-${Date.now()}`,
+      groupId,
+      courseId: group.courseId,
+      inviterId: currentUser.id,
+      inviteeId: studentId,
+      status: 'pending',
+      createdAt: new Date().toISOString(),
+    };
+    
+    setGroupInvitations((prev) => [...prev, newInvitation]);
+    showToast('Invitation sent!', 'success');
   };
 
   const handleJoinGroup = (assignmentId) => {
@@ -306,8 +397,16 @@ function AppContent() {
               courses={courses}
               assignments={assignments}
               acknowledgments={acknowledgments}
+              allStudents={users.filter((u) => u.role === Role.Student)}
+              groups={groups}
+              groupInvitations={groupInvitations}
               onCourseClick={handleCourseClick}
               onEnrollCourse={handleEnrollCourse}
+              onCreateGroup={handleCreateGroup}
+              onSendInvitation={handleSendInvitation}
+              onAcceptInvitation={handleAcceptInvitation}
+              onRejectInvitation={handleRejectInvitation}
+              onLeaveGroup={handleLeaveGroup}
             />
           ) : (
             <StudentCourseAssignmentsPage

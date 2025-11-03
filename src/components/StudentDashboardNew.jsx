@@ -1,9 +1,27 @@
 import React, { useState } from 'react';
-import { BookOpen, Calendar, CheckCircle2, Clock, ArrowRight, GraduationCap, Plus, X, Search } from 'lucide-react';
+import { BookOpen, Calendar, CheckCircle2, Clock, ArrowRight, GraduationCap, Plus, X, Search, Users } from 'lucide-react';
+import GroupManagementModal from './GroupManagementModal';
 
 // Student Dashboard showing enrolled courses
-const StudentDashboardNew = ({ student, courses, assignments, acknowledgments, onCourseClick, onEnrollCourse }) => {
+const StudentDashboardNew = ({ 
+  student, 
+  courses, 
+  assignments, 
+  acknowledgments, 
+  onCourseClick, 
+  onEnrollCourse,
+  allStudents,
+  groups,
+  groupInvitations,
+  onCreateGroup,
+  onSendInvitation,
+  onAcceptInvitation,
+  onRejectInvitation,
+  onLeaveGroup,
+}) => {
   const [isEnrollModalOpen, setIsEnrollModalOpen] = useState(false);
+  const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
+  const [selectedCourseForGroup, setSelectedCourseForGroup] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
 
   // Get courses student is enrolled in
@@ -28,6 +46,19 @@ const StudentDashboardNew = ({ student, courses, assignments, acknowledgments, o
     onEnrollCourse(courseId);
     setIsEnrollModalOpen(false);
     setSearchTerm('');
+  };
+
+  // Open group management modal
+  const handleOpenGroupModal = (course) => {
+    setSelectedCourseForGroup(course);
+    setIsGroupModalOpen(true);
+  };
+
+  // Get pending invitation count for a course
+  const getPendingInvitationsCount = (courseId) => {
+    return groupInvitations.filter(
+      (inv) => inv.courseId === courseId && inv.inviteeId === student.id && inv.status === 'pending'
+    ).length;
   };
 
   // Calculate course statistics
@@ -103,28 +134,20 @@ const StudentDashboardNew = ({ student, courses, assignments, acknowledgments, o
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-md p-6 border-l-4 border-orange-500 hover:shadow-lg transition-shadow">
+          <div className="bg-white rounded-xl shadow-md p-6 border-l-4 border-purple-500 hover:shadow-lg transition-shadow">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-600 font-medium">Upcoming</p>
+                <p className="text-sm text-slate-600 font-medium">Total Assignments</p>
                 <p className="text-3xl font-bold text-slate-800 mt-1">
                   {
-                    assignments.filter(
-                      (a) =>
-                        enrolledCourses.some((c) => c.id === a.courseId) &&
-                        new Date(a.dueDate) > new Date() &&
-                        !acknowledgments.some(
-                          (ack) =>
-                            ack.assignmentId === a.id &&
-                            ack.studentId === student.id &&
-                            ack.acknowledged
-                        )
+                    assignments.filter((a) =>
+                      enrolledCourses.some((c) => c.id === a.courseId)
                     ).length
                   }
                 </p>
               </div>
-              <div className="p-3 bg-orange-100 rounded-lg">
-                <Clock className="w-6 h-6 text-orange-600" />
+              <div className="p-3 bg-purple-100 rounded-lg">
+                <BookOpen className="w-6 h-6 text-purple-600" />
               </div>
             </div>
           </div>
@@ -161,12 +184,12 @@ const StudentDashboardNew = ({ student, courses, assignments, acknowledgments, o
                   stats.totalAssignments > 0
                     ? (stats.acknowledgedCount / stats.totalAssignments) * 100
                     : 0;
+                const pendingInvitations = getPendingInvitationsCount(course.id);
 
                 return (
                   <div
                     key={course.id}
-                    onClick={() => onCourseClick(course.id)}
-                    className="bg-white rounded-xl shadow-md hover:shadow-xl transform hover:scale-[1.02] transition-all duration-300 cursor-pointer overflow-hidden group"
+                    className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden"
                   >
                     {/* Color Header */}
                     <div className={`h-3 ${course.color}`}></div>
@@ -175,10 +198,9 @@ const StudentDashboardNew = ({ student, courses, assignments, acknowledgments, o
                       {/* Course Info */}
                       <div className="mb-4">
                         <div className="flex items-start justify-between mb-2">
-                          <h3 className="text-xl font-bold text-slate-800 group-hover:text-blue-600 transition-colors">
+                          <h3 className="text-xl font-bold text-slate-800">
                             {course.name}
                           </h3>
-                          <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-blue-600 group-hover:translate-x-1 transition-all" />
                         </div>
                         <p className="text-sm font-semibold text-slate-500">
                           {course.code}
@@ -203,7 +225,7 @@ const StudentDashboardNew = ({ student, courses, assignments, acknowledgments, o
                       </div>
 
                       {/* Stats */}
-                      <div className="space-y-2 pt-4 border-t border-slate-100">
+                      <div className="space-y-2 pt-4 border-t border-slate-100 mb-4">
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-slate-600 flex items-center gap-2">
                             <CheckCircle2 className="w-4 h-4 text-green-500" />
@@ -215,13 +237,39 @@ const StudentDashboardNew = ({ student, courses, assignments, acknowledgments, o
                         </div>
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-slate-600 flex items-center gap-2">
-                            <Clock className="w-4 h-4 text-orange-500" />
-                            Upcoming
+                            <BookOpen className="w-4 h-4 text-slate-500" />
+                            Total
                           </span>
                           <span className="font-semibold text-slate-800">
-                            {stats.upcomingCount}
+                            {stats.totalAssignments}
                           </span>
                         </div>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => onCourseClick(course.id)}
+                          className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg hover:from-blue-600 hover:to-cyan-600 transition-all text-sm font-semibold"
+                        >
+                          <BookOpen className="w-4 h-4" />
+                          View
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleOpenGroupModal(course);
+                          }}
+                          className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white rounded-lg hover:from-purple-600 hover:to-fuchsia-600 transition-all text-sm font-semibold relative"
+                        >
+                          <Users className="w-4 h-4" />
+                          Groups
+                          {pendingInvitations > 0 && (
+                            <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                              {pendingInvitations}
+                            </span>
+                          )}
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -360,6 +408,28 @@ const StudentDashboardNew = ({ student, courses, assignments, acknowledgments, o
             </div>
           </div>
         </div>
+      )}
+
+      {/* Group Management Modal */}
+      {isGroupModalOpen && selectedCourseForGroup && (
+        <GroupManagementModal
+          course={selectedCourseForGroup}
+          student={student}
+          allStudents={allStudents}
+          groups={groups}
+          groupInvitations={groupInvitations}
+          onClose={() => {
+            setIsGroupModalOpen(false);
+            setSelectedCourseForGroup(null);
+          }}
+          onCreateGroup={(groupName, memberIds) => {
+            onCreateGroup(selectedCourseForGroup.id, groupName, memberIds);
+          }}
+          onSendInvitation={onSendInvitation}
+          onAcceptInvitation={onAcceptInvitation}
+          onRejectInvitation={onRejectInvitation}
+          onLeaveGroup={onLeaveGroup}
+        />
       )}
     </div>
   );
