@@ -218,6 +218,12 @@ function AppContent() {
 
   // Group handlers (Student)
   const handleCreateGroup = (courseId, groupName, memberIds) => {
+    // If called with just assignmentId (from StudentCourseAssignmentsPage), show info
+    if (typeof courseId === 'string' && !groupName && !memberIds) {
+      showToast('Please use the Groups button in the dashboard to create a group', 'info');
+      return;
+    }
+
     const newGroup = {
       id: `group-${Date.now()}`,
       courseId,
@@ -230,7 +236,7 @@ function AppContent() {
     setGroups((prev) => [...prev, newGroup]);
 
     // Create invitations for selected members
-    const invitations = memberIds.map((memberId) => ({
+    const invitations = (memberIds || []).map((memberId) => ({
       id: `invitation-${Date.now()}-${memberId}`,
       groupId: newGroup.id,
       courseId,
@@ -241,7 +247,7 @@ function AppContent() {
     }));
 
     setGroupInvitations((prev) => [...prev, ...invitations]);
-    showToast(`Group "${groupName}" created! Invitations sent to ${memberIds.length} student${memberIds.length > 1 ? 's' : ''}.`, 'success');
+    showToast(`Group "${groupName}" created! Invitations sent to ${memberIds?.length || 0} student${memberIds?.length > 1 ? 's' : ''}.`, 'success');
   };
 
   const handleAcceptInvitation = (invitationId) => {
@@ -313,8 +319,7 @@ function AppContent() {
   };
 
   const handleJoinGroup = (assignmentId) => {
-    // TODO: Implement join group modal
-    showToast('Join group functionality coming soon', 'info');
+    showToast('Please use the Groups button in the dashboard to view and accept group invitations', 'info');
   };
 
   // Get selected course
