@@ -8,13 +8,13 @@ A modern React + Vite application for managing academic assignments with role-ba
 ## UI Screenshots
 
 ### Professor Dashboard
-![Professor Dashboard](https://drive.google.com/file/d/1hNbgvwRd-YHGf0AH1-0iqANWg3PESfmi/view?usp=sharing)
+![Professor Dashboard](https://drive.google.com/file/d/1hNbgvwRd-YHGf0AH1-0iqANWg3PESfmi)
 
 ### Student Dashboard
-![Student Dashboard](https://drive.google.com/file/d/1NosRydIe_inHJJYIyDlLaOhd4IvLqC-y/view?usp=sharing)
+![Student Dashboard](https://drive.google.com/file/d/1NosRydIe_inHJJYIyDlLaOhd4IvLqC-y)
 
 ### Group Management
-![Group Management](https://drive.google.com/file/d/1hRdZb_6nEDF5fZ1zV2rzVjpCBJKuXWH8/view?usp=sharing)
+![Group Management](https://drive.google.com/file/d/1hRdZb_6nEDF5fZ1zV2rzVjpCBJKuXWH8)
 
 ## Features
 
