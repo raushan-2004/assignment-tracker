@@ -238,7 +238,7 @@ const ProfessorDashboard = ({ professor, courses, assignments, onCourseClick, on
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-white bg-opacity-20 rounded-lg">
-                    <BookOpen className="w-6 h-6" />
+                    <BookOpen className="w-6 h-6 text-black" />
                   </div>
                   <h2 className="text-2xl font-bold">Create New Course</h2>
                 </div>
