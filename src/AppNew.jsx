@@ -46,8 +46,8 @@ function AppContent() {
     INITIAL_ACKNOWLEDGMENTS
   );
   
-  const [currentUser, setCurrentUser] = useState(null);
-  const [authToken, setAuthToken] = useState(null); // Simulated JWT
+  const [currentUser, setCurrentUser] = useLocalStorage('currentUser', null);
+  const [authToken, setAuthToken] = useLocalStorage('authToken', null); // Simulated JWT
   const [currentView, setCurrentView] = useState('dashboard'); // dashboard, courseAssignments
   const [selectedCourseId, setSelectedCourseId] = useState(null);
 
